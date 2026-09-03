@@ -1,0 +1,137 @@
+
+General Rules:
+- Always use !0 (NOT !1)
+- Main command: B only
+- Response header: 0b (fixed)
+- Fixed length, no pipe symbol "|"
+- Each command ends with \r\n\x03
+- Vendor: A / B / C / D
+- Scale number: 2 digits
+
+2. System Parameters (PC → Scale)
+
+Operation          Command Format                  Response Format
+
+Set Server IP      !0BI192.168.001.100            0bI	  (func + 9003 + enter)  
+Query Server IP    !0BI                            0bI192.168.001.100
+Set Server Port    !0BO04001                       0bO	 (func + 9004 + enter)
+Query Server Port  !0BO                            0bO04001
+Set Mode F / N     !0BMF  or  !0BMN               0bM
+Query Mode         !0BM                            0bMF  or  0bMN   (func + 9005 + enter)     00:F        01:N
+Force Clear Display !0BC                           0bC
+
+Note:
+- Local menu also allows setting N/F mode, Remote IP, and Remote Port.
+
+3. Transactions (Scale → PC)
+
+Field Notes (immediately following sub-code):
+- Scale number: 2 digits
+- Vendor: 1 digit (A/B/C/D)
+- Add (accumulate) command additionally includes:
+  - PLU: 7 digits
+  - Name：variable length
+  - Quantity: 5 digits
+  - Amount: 8 digits
+- Amount/Weight: no decimal point, no "$" symbol
+
+
+3.1 Memory Query (Empty / Loaded)
+Scenario: A–D (empty scale)
+Request:  !0BQ01A
+Response (empty): 0bQ01A000 00000000
+Response (loaded): 0bQ01A002BANANA 00000805
+
+Format:
+0bQ + Scale(2) + Vendor(1) + Status(3) + ItemName + Weight(5) + Amount(8)
+
+
+3.2 Accumulate (Loaded)
+
+Scenario: A–D (with item)
+Request:  !0BA01A00001230125000000805
+Response: 0bA01ABANANA 00200000805
+
+Request breakdown:
+!0BA + Scale(2) + Vendor(1) + PLU(5) + Qty(5) + Amount(8)
+
+Response breakdown:
+0bA + Scale(2) + Vendor(1) + ItemName + Status(3) + Amount(8)
+
+
+3.3 Merge & Print
+
+Scenario: Press PRINT key
+Request:  !0BS01A
+Response: 0bS01A004589
+Then following responses in sequence:
+0bH… (Header)
+0bL… × N (Detail lines, N items)
+0bE… (End)
+
+Print stream format:
+0bH + TicketNo(5) + Title(32)
+0bL + LineNo(5) + ItemName + Qty(5) + Amount(8)
+0bE + TicketNo(5) + TotalItems(3) + TotalAmount(8)
+
+
+3.4 Delete Last Item(func + clear key)
+
+Scenario: Press MODIFY key
+Request:  !0BD01A
+Response (with item): 0bD01A00100000500
+Response (empty):     0bD01A00000000000
+
+Response breakdown:
+0bD + Scale(2) + Vendor(1) + Status(3) + RemainingAmount(8)
+
+
+3.5 Void Entire Transaction
+
+Scenario: Press FUNC + CLEAR
+Request:  !0BV01A
+Response: 0bV01A00000000000
+
+Response breakdown:
+0bV + Scale(2) + Vendor(1) + Status(3) + ZeroPadding(8)
+
+
+4. Exception Handling
+
+Timeout:
+- If no response with matching 0b + same sub-code is received within 1.5s
+- Scale displays: ERROR COMUNICACION
+
+After any key press:
+- Retry      : Reconnect and resend original request     (input: 	00)  
+- Stand : Fallback to N mode, single-label printing only	(input: 	01)
+
+Note: If the connection is not established after retrying for more than 3 seconds, STAND will be automatically selected. Press the confirm key to save; if, the menu interface will exit and return to weighing.
+
+
+For example：sample data
+
+[+] scale connected from ('192.168.0.150', 4001)
+RX ('192.168.0.150', 4001): b'!0BA01A00001Manzanas0125000004610\r\n\x03'
+  FRAME: b'!0BA01A00001Manzanas0125000004610'
+TX ('192.168.0.150', 4001): b'0bA01A00001Manzanas00100004610\r\n\x03'
+RX ('192.168.0.150', 4001): b'!0BA01A00002apple0125000000500\r\n\x03'
+  FRAME: b'!0BA01A00002apple0125000000500'
+TX ('192.168.0.150', 4001): b'0bA01A00002apple00200005110\r\n\x03'
+RX ('192.168.0.150', 4001): b'!0BA01A00003peach0125000000630\r\n\x03'
+  FRAME: b'!0BA01A00003peach0125000000630'
+TX ('192.168.0.150', 4001): b'0bA01A00003peach00300005740\r\n\x03'
+RX ('192.168.0.150', 4001): b'!0BA01A00004orange0125000000750\r\n\x03'
+  FRAME: b'!0BA01A00004orange0125000000750'
+TX ('192.168.0.150', 4001): b'0bA01A00004orange00400006490\r\n\x03'
+RX ('192.168.0.150', 4001): b'!0BD01A\r\n\x03'
+  FRAME: b'!0BD01A'
+TX ('192.168.0.150', 4001): b'0bD01A00300005740\r\n\x03'
+RX ('192.168.0.150', 4001): b'!0BS01A\r\n\x03'
+  FRAME: b'!0BS01A'
+TX ('192.168.0.150', 4001): b'0bS01A000001\r\n\x03'
+TX ('192.168.0.150', 4001): b'0bH000001Scale01 VendorA                 \r\n\x03'
+TX ('192.168.0.150', 4001): b'0bL000100001Manzanas0125000004610\r\n\x03'
+TX ('192.168.0.150', 4001): b'0bL000200002apple0125000000500\r\n\x03'
+TX ('192.168.0.150', 4001): b'0bL000300003peach0125000000630\r\n\x03'
+TX ('192.168.0.150', 4001): b'0bE00000100300005740\r\n\x03'
