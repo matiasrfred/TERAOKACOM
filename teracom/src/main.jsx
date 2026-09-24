@@ -17,6 +17,8 @@ if (typeof window !== 'undefined' && !window.teracom) {
     clearScale: async () => {},
     clearAll: async () => {},
     triggerPrint: async () => {},
+    deleteLast: async () => {},
+    voidVendor: async () => {},
     removeAllListeners: () => {},
   }
 }

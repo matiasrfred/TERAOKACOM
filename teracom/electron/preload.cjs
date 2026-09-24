@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('teracom', {
   onScaleEvent: (cb) => ipcRenderer.on('scale:event', (_e, d) => cb(d)),
   onPrintStream: (cb) => ipcRenderer.on('scale:print', (_e, d) => cb(d)),
   onScalesUpdated: (cb) => ipcRenderer.on('scales:updated', (_e, d) => cb(d)),
+  onScaleTx: (cb) => ipcRenderer.on('scale:tx', (_e, d) => cb(d)),
 
   // Commands
   sendCommand: (cmd) => ipcRenderer.invoke('tcp:send', cmd),
@@ -24,6 +25,13 @@ contextBridge.exposeInMainWorld('teracom', {
 
   // Print
   triggerPrint: (vendor) => ipcRenderer.invoke('print:trigger', vendor),
+
+  // Scale control
+  deleteLast: (vendor) => ipcRenderer.invoke('scale:deleteLast', { vendor }),
+  voidVendor: (vendor) => ipcRenderer.invoke('scale:voidVendor', { vendor }),
+  queryMode: (ip) => ipcRenderer.invoke('scale:queryMode', { ip }),
+  clearDisplay: (ip) => ipcRenderer.invoke('scale:clearDisplay', { ip }),
+  setMode: (ip, mode) => ipcRenderer.invoke('scale:setMode', { ip, mode }),
 
   // Cleanup
   removeAllListeners: () => {

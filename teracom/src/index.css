@@ -55,6 +55,18 @@ body {
 }
 .btn-danger:hover { background: rgba(127, 29, 29, 0.8); }
 
+.lang-toggle {
+  display: flex; gap: 2px;
+  background: #1e293b; border: 1px solid #334155;
+  border-radius: 6px; padding: 3px 6px; cursor: pointer;
+  font-size: 11px; font-weight: 700; font-family: monospace;
+  transition: background 0.15s;
+}
+.lang-toggle:hover { background: #334155; }
+.lang-toggle span { color: #475569; transition: color 0.15s; }
+.lang-toggle span.active { color: #f8fafc; }
+.lang-toggle span:first-child::after { content: ' /'; color: #334155; }
+
 /* ── Status Bar ─────────────────────────────────────────────── */
 .status-bar {
   display: flex; align-items: center; justify-content: space-between;
@@ -68,11 +80,12 @@ body {
 .status-port { font-size: 11px; color: #334155; font-family: monospace; }
 .status-version { font-size: 11px; color: #1e293b; font-family: monospace; }
 
-/* ── App Body (sidebar + main) ─────────────────────────────── */
+/* ── App Body (sidebar + main + activity) ─────────────────── */
 .app-body {
   display: flex;
   flex: 1;
   overflow: hidden;
+  gap: 0;
 }
 
 /* ── Sidebar ───────────────────────────────────────────────── */
@@ -100,9 +113,20 @@ body {
   background: #1e293b;
 }
 .scale-indicator { width: 6px; height: 6px; border-radius: 50%; background: #34d399; flex-shrink: 0; }
-.scale-info { min-width: 0; }
+.scale-info { flex: 1; min-width: 0; }
 .scale-name { font-size: 12px; font-weight: 600; color: #e2e8f0; }
 .scale-ip { font-size: 10px; color: #475569; font-family: monospace; }
+.sidebar-clear-btn {
+  padding: 3px 5px;
+  border: none; border-radius: 4px;
+  background: #334155; color: #94a3b8;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.03em;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1.2;
+}
+.sidebar-clear-btn span { display: block; font-size: 8px; font-weight: 400; opacity: 0.7; }
+.sidebar-clear-btn:hover { background: #ef4444; color: #fff; }
 
 /* ── Main Area ─────────────────────────────────────────────── */
 .main-area {
@@ -112,6 +136,18 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+/* ── Activity Sidebar (right) ──────────────────────────────── */
+.activity-sidebar {
+  width: 650px;
+  flex-shrink: 0;
+  background: #0f172a;
+  border-left: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px 10px;
 }
 
 /* ── Empty State ───────────────────────────────────────────── */
@@ -199,18 +235,39 @@ body {
 }
 .btn-clear-sm:hover { background: rgba(127, 29, 29, 0.7); }
 
+.btn-delete-last {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; padding: 4px 8px;
+  background: rgba(120, 53, 15, 0.4); color: #fed7aa;
+  border: none; border-radius: 5px; cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-delete-last:hover { background: rgba(120, 53, 15, 0.7); }
+.btn-delete-last svg { width: 11px; height: 11px; }
+
+.btn-void {
+  font-size: 11px; padding: 4px 8px;
+  background: rgba(127, 29, 29, 0.4); color: #fca5a5;
+  border: none; border-radius: 5px; cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-void:hover { background: rgba(127, 29, 29, 0.7); }
+
 /* ── Event Log ─────────────────────────────────────────────── */
 .event-log {
-  background: #0f172a; border-radius: 10px;
-  border: 1px solid #1e293b; overflow: hidden;
-  flex-shrink: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .event-log-header {
   padding: 7px 14px; background: #1e293b;
   border-bottom: 1px solid #1e293b;
+  border-radius: 6px 6px 0 0;
+  flex-shrink: 0;
 }
 .event-log-header span { font-size: 11px; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
-.event-log-body { height: 140px; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 1px; }
+.event-log-body { flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 1px; }
 .event-empty { color: #1e293b; font-size: 11px; text-align: center; padding: 20px 0; }
 .event-row { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; padding: 3px 0; }
 .ev-time { color: #334155; font-family: monospace; width: 22px; flex-shrink: 0; }
@@ -221,4 +278,5 @@ body {
 .ev-print { background: rgba(5, 150, 105, 0.4); color: #6ee7b7; }
 .ev-connected { background: rgba(88, 28, 135, 0.5); color: #d8b4fe; }
 .ev-disconnected { background: rgba(55, 65, 81, 0.5); color: #6b7280; }
+.ev-tx { background: rgba(15, 90, 60, 0.5); color: #6ee7b7; }
 .ev-msg { color: #94a3b8; line-height: 1.4; }

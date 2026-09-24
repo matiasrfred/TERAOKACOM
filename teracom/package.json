@@ -48,5 +48,8 @@
     "win": {
       "target": "nsis"
     }
+  },
+  "allowScripts": {
+    "electron-winstaller@5.4.0": true
   }
 }
